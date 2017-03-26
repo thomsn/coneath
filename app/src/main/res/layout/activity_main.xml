@@ -9,10 +9,10 @@ android:paddingRight="16dp" >
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/graph"
-    android:layout_above="@+id/seekBar" />
+    android:layout_above="@+id/button" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
+    <Button
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -20,6 +20,5 @@ android:paddingRight="16dp" >
         android:layout_alignParentBottom="true"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:max="10"
-        android:progress="3" />
+       />
 </RelativeLayout>

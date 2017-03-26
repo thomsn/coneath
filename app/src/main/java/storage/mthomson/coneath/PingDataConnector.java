@@ -71,6 +71,15 @@ public class PingDataConnector extends SQLiteOpenHelper{
         return data;
     }
 
+
+    private static final String DELETE_DATA = "DELETE FROM " + DATABASE_PING_TABLE_NAME + " WHERE "  + DATABASE_PING_TIMESTAMP_COLUMN + " <= %1d";
+    public void delete(Date to){
+        SQLiteDatabase db = getWritableDatabase();
+
+        String command = String.format(DELETE_DATA, to.getTime());
+        db.execSQL(command);
+        db.close();
+    }
     private static final String DELETE_ALL_DATA = "DELETE FROM " + DATABASE_PING_TABLE_NAME;
     public void deleteAllData(){
         SQLiteDatabase db = getWritableDatabase();

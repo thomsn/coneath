@@ -8,5 +8,5 @@ import java.sql.Date;
 
 public class PingData {
     public Date Timestamp;
-    public int PingValue;
+    public double PingValue;
 }

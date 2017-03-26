@@ -22,7 +22,7 @@ public class PingDataConnector extends SQLiteOpenHelper{
             "CREATE TABLE " + DATABASE_PING_TABLE_NAME + " (" +
             DATABASE_TABLE_ID + " INTEGER PRIMARY KEY ASC, " +
             DATABASE_PING_TIMESTAMP_COLUMN + " INTEGER, " +
-            DATABASE_PING_VALUE_COLUMN + " INTEGER);";
+            DATABASE_PING_VALUE_COLUMN + " REAL);";
 
     private SQLiteDatabase _db;
 
@@ -40,10 +40,12 @@ public class PingDataConnector extends SQLiteOpenHelper{
     }
 
     private static final String INSERT_NEW_ENTRY = "INSERT INTO " + DATABASE_PING_TABLE_NAME + " (" + DATABASE_PING_TIMESTAMP_COLUMN + ", " + DATABASE_PING_VALUE_COLUMN + ") "
-            + "VALUES ('%1d', %2d)";
-    public void savePing(PingData data){
+            + "VALUES ('%1d', %2f)";
+    public void savePing(double ping){
         SQLiteDatabase db = getWritableDatabase();
-        String sqlCommand = String.format(INSERT_NEW_ENTRY, data.Timestamp.getTime(), data.PingValue);
+
+        java.util.Date date = new java.util.Date();
+        String sqlCommand = String.format(INSERT_NEW_ENTRY, date.getTime(), ping);
         db.execSQL(sqlCommand);
         db.close();
     }
@@ -69,7 +71,19 @@ public class PingDataConnector extends SQLiteOpenHelper{
         return data;
     }
 
+    private static final String DELETE_ALL_DATA = "DELETE FROM " + DATABASE_PING_TABLE_NAME;
     public void deleteAllData(){
+        SQLiteDatabase db = getWritableDatabase();
 
+        db.execSQL(DELETE_ALL_DATA);
+        db.close();
+    }
+
+    private static final String DROP_TABLE = "DROP " + DATABASE_PING_TABLE_NAME;
+    public void dropTable() {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.execSQL(DROP_TABLE);
+        db.close();
     }
 }

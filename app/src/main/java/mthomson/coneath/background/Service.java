@@ -17,12 +17,12 @@ public class Service extends IntentService {
 
     public Service(String name) {
         super(name);
-        storage_connection = new PingDataConnector();
+        storage_connection = new PingDataConnector(this, null);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ping();
+        storage_connection.savePing(ping());
     }
 
     private double ping() {

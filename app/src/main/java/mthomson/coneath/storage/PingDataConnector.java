@@ -1,4 +1,4 @@
-package storage.mthomson.coneath;
+package mthomson.coneath.storage;
 
 import android.content.Context;
 import android.database.Cursor;

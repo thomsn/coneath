@@ -1,4 +1,4 @@
-package storage.mthomson.coneath;
+package mthomson.coneath.storage;
 
 import java.sql.Date;
 

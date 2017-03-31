@@ -41,13 +41,20 @@ public class PingDataConnector extends SQLiteOpenHelper{
 
     private static final String INSERT_NEW_ENTRY = "INSERT INTO " + DATABASE_PING_TABLE_NAME + " (" + DATABASE_PING_TIMESTAMP_COLUMN + ", " + DATABASE_PING_VALUE_COLUMN + ") "
             + "VALUES ('%1d', %2f)";
-    public void savePing(double ping){
-        SQLiteDatabase db = getWritableDatabase();
 
-        java.util.Date date = new java.util.Date();
-        String sqlCommand = String.format(INSERT_NEW_ENTRY, date.getTime(), ping);
+    public void savePing(PingData ping){
+        SQLiteDatabase db = getWritableDatabase();
+        String sqlCommand = String.format(INSERT_NEW_ENTRY, ping.Timestamp.getTime(), ping.PingValue);
         db.execSQL(sqlCommand);
         db.close();
+    }
+
+    public static PingData makePing(double ping){
+        java.util.Date date = new java.util.Date();
+        PingData newData = new PingData();
+        newData.PingValue = ping;
+        newData.Timestamp = new java.sql.Date(date.getTime());
+        return newData;
     }
 
     private static final String SELECT_DATA = "SELECT * FROM " + DATABASE_PING_TABLE_NAME + " WHERE " + DATABASE_PING_TIMESTAMP_COLUMN + " >= %1d ORDER BY " + DATABASE_PING_TIMESTAMP_COLUMN + " ASC";
@@ -66,7 +73,6 @@ public class PingDataConnector extends SQLiteOpenHelper{
                 data.add(newData);
             } while (cursor.moveToNext());
         }
-
         db.close();
         return data;
     }
@@ -88,7 +94,7 @@ public class PingDataConnector extends SQLiteOpenHelper{
         db.close();
     }
 
-    private static final String DROP_TABLE = "DROP " + DATABASE_PING_TABLE_NAME;
+    private static final String DROP_TABLE = "DROP TABLE " + DATABASE_PING_TABLE_NAME;
     public void dropTable() {
         SQLiteDatabase db = getWritableDatabase();
 

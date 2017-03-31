@@ -1,4 +1,5 @@
 package mthomson.coneath;
+import android.app.AlarmManager;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -10,7 +11,6 @@ import android.widget.Button;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import java.util.ArrayList;
 import mthomson.coneath.background.Service;
 import mthomson.coneath.storage.PingData;
 import mthomson.coneath.storage.PingDataConnector;
@@ -25,10 +25,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         GraphView graph = (GraphView) findViewById(R.id.graph);
-        graph.addSeries(mSeries);
         graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(0.5);
+        mSeries.setDrawDataPoints(true);
+        mSeries.setDrawBackground(true);
+        graph.addSeries(mSeries);
         for (PingData ping : data_connection.getPing(new java.sql.Date(new java.util.Date().getTime()-300000))) {
-            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime(), ping.PingValue), true, 10);
+            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
         }
 
         final Button button = (Button) findViewById(R.id.button);
@@ -40,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
                 getActivity().startService(serviceIntent);
             }
         });
-
     }
     private PingDataConnector data_connection = new PingDataConnector(this, null);
 
@@ -53,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
             PingData ping = new PingData();
             ping.Timestamp = new java.sql.Date(ping_bundle.getLong("Timestamp"));
             ping.PingValue = ping_bundle.getDouble("PingValue");
-            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime(), ping.PingValue), true, 10);
-            System.out.print("Added a point");
+            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
         }
     };
 }

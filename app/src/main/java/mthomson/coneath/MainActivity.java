@@ -1,4 +1,9 @@
 package mthomson.coneath;
+import android.app.AlarmManager;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -6,76 +11,52 @@ import android.widget.Button;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import mthomson.coneath.background.Service;
+import mthomson.coneath.storage.PingData;
+import mthomson.coneath.storage.PingDataConnector;
 
 public class MainActivity extends AppCompatActivity {
+    private AppCompatActivity getActivity() {
+        return this;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        graph = (GraphView) findViewById(R.id.graph);
-        graph.getViewport().setMaxX(20.0);
+        GraphView graph = (GraphView) findViewById(R.id.graph);
         graph.getViewport().setXAxisBoundsManual(true);
-        update_graph();
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(0.5);
+        mSeries.setDrawDataPoints(true);
+        mSeries.setDrawBackground(true);
+        graph.addSeries(mSeries);
+        for (PingData ping : data_connection.getPing(new java.sql.Date(new java.util.Date().getTime()-300000))) {
+            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
+        }
 
         final Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                update_graph();
+                // kick off service to ping
+                Intent serviceIntent = new Intent(getActivity(), Service.class);
+                serviceIntent.putExtra("messenger", new Messenger(pingHandler));
+                getActivity().startService(serviceIntent);
             }
         });
-
     }
-    private GraphView graph;
+    private PingDataConnector data_connection = new PingDataConnector(this, null);
 
-    private ArrayList<DataPoint> dataPoints = new ArrayList<>();
-    private double datapoint_num = 0.0;
+    private LineGraphSeries<DataPoint> mSeries = new LineGraphSeries<>();
 
-    private void update_graph() {
-        dataPoints.add(new DataPoint(datapoint_num, ping()));
-        datapoint_num+=1.0;
-        graph.removeAllSeries();
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints.toArray(new DataPoint[dataPoints.size()]));
-        graph.addSeries(series);
-        graph.getViewport().scrollToEnd();
-    }
-
-    private double ping() {
-        Runtime runtime = Runtime.getRuntime();
-        try
-        {
-            Process  process = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int mExitValue = process.waitFor();
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            if(mExitValue==0){
-                Pattern pattern = Pattern.compile("time=(\\d.+)*\\sms");
-                Matcher m;
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    m = pattern.matcher(inputLine);
-                    if (m.find()) {
-                        return Double.parseDouble(m.group(1));
-                    }
-                }
-            }else{
-                BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                String error_str = error.readLine();
-                System.out.println(" mExitValue "+ error_str);
-                return -1.0;
-            }
+    public Handler pingHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle ping_bundle = msg.getData().getBundle("PingData");
+            PingData ping = new PingData();
+            ping.Timestamp = new java.sql.Date(ping_bundle.getLong("Timestamp"));
+            ping.PingValue = ping_bundle.getDouble("PingValue");
+            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
         }
-        catch (InterruptedException | IOException ignore)
-        {
-            ignore.printStackTrace();
-            System.out.println(" Exception:"+ignore);
-        }
-        return -1.0;
-    }
+    };
 }

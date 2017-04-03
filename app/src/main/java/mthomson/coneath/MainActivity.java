@@ -11,6 +11,8 @@ import android.widget.Button;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import mthomson.coneath.background.Alarm;
 import mthomson.coneath.background.Service;
 import mthomson.coneath.storage.PingData;
 import mthomson.coneath.storage.PingDataConnector;
@@ -34,29 +36,11 @@ public class MainActivity extends AppCompatActivity {
         for (PingData ping : data_connection.getPing(new java.sql.Date(new java.util.Date().getTime()-300000))) {
             mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
         }
-
-        final Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // kick off service to ping
-                Intent serviceIntent = new Intent(getActivity(), Service.class);
-                serviceIntent.putExtra("messenger", new Messenger(pingHandler));
-                getActivity().startService(serviceIntent);
-            }
-        });
+        Alarm alarm = new Alarm();
+        alarm.setAlarm(this);
     }
+
     private PingDataConnector data_connection = new PingDataConnector(this, null);
 
     private LineGraphSeries<DataPoint> mSeries = new LineGraphSeries<>();
-
-    public Handler pingHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Bundle ping_bundle = msg.getData().getBundle("PingData");
-            PingData ping = new PingData();
-            ping.Timestamp = new java.sql.Date(ping_bundle.getLong("Timestamp"));
-            ping.PingValue = ping_bundle.getDouble("PingValue");
-            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
-        }
-    };
 }

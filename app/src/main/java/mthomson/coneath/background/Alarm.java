@@ -25,8 +25,8 @@ public class Alarm extends WakefulBroadcastReceiver {
         Calendar calendar = Calendar.getInstance();
 
         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
-                AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
+                SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR/30,
+                AlarmManager.INTERVAL_HALF_HOUR/30, alarmIntent);
 
         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                 calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);

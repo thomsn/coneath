@@ -25,5 +25,6 @@ public class Service extends IntentService {
     protected void onHandleIntent(Intent intent) {
         PingData pingData = PingDataConnector.makePing(Ping.get());
         storage_connection.savePing(pingData);
+        System.out.println("Added a point");
     }
 }

@@ -1,12 +1,14 @@
 package mthomson.coneath.background;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Ping {
-    public static double get() {
+class Ping {
+    static double get() {
         Runtime runtime = Runtime.getRuntime();
         try
         {
@@ -27,14 +29,14 @@ public class Ping {
             }else{
                 BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                 String error_str = error.readLine();
-                System.out.println(" mExitValue "+ error_str);
+                Log.e("Ping"," mExitValue "+ error_str);
                 return -1.0;
             }
         }
         catch (InterruptedException | IOException ignore)
         {
             ignore.printStackTrace();
-            System.out.println(" Exception:"+ignore);
+            Log.e("Ping"," Exception:"+ignore);
         }
         return -1.0;
     }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +26,6 @@ public class Service extends IntentService {
     protected void onHandleIntent(Intent intent) {
         PingData pingData = PingDataConnector.makePing(Ping.get());
         storage_connection.savePing(pingData);
-        System.out.println("Added a point");
+        Log.d(this.getClass().getName(), "Added Point");
     }
 }

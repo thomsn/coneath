@@ -1,19 +1,17 @@
 package mthomson.coneath;
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.util.Log;
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import mthomson.coneath.background.Alarm;
-import mthomson.coneath.background.Service;
 import mthomson.coneath.storage.PingData;
 import mthomson.coneath.storage.PingDataConnector;
 
@@ -21,7 +19,8 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatActivity getActivity() {
         return this;
     }
-
+    AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +35,20 @@ public class MainActivity extends AppCompatActivity {
         for (PingData ping : data_connection.getPing(new java.sql.Date(new java.util.Date().getTime()-300000))) {
             mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
         }
-        Alarm alarm = new Alarm();
-        alarm.setAlarm(this);
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent myIntent = new Intent(MainActivity.this, Alarm.class);
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+        setAlarm();
+    }
+
+    private void setAlarm(){
+        Log.d(this.getClass().getName(), "Set Alarm");
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime()+AlarmManager.INTERVAL_FIFTEEN_MINUTES, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+    }
+    private void cancelAlarm() {
+        if (alarmManager!= null) {
+            alarmManager.cancel(pendingIntent);
+        }
     }
 
     private PingDataConnector data_connection = new PingDataConnector(this, null);

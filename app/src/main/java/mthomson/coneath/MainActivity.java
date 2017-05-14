@@ -25,6 +25,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupGraph();
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent myIntent = new Intent(MainActivity.this, Alarm.class);
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+        setAlarm();
+
+
+//        Intent dbmanager = new Intent(getActivity(), AndroidDatabaseManager.class);
+//        startActivity(dbmanager);
+    }
+
+    private void setupGraph(){
         GraphView graph = (GraphView) findViewById(R.id.graph);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
@@ -32,17 +44,18 @@ public class MainActivity extends AppCompatActivity {
         mSeries.setDrawDataPoints(true);
         mSeries.setDrawBackground(true);
         graph.addSeries(mSeries);
-        for (PingData ping : data_connection.getPing(new java.sql.Date(new java.util.Date().getTime()-300000))) {
-            mSeries.appendData(new DataPoint((double) ping.Timestamp.getTime()/60000.0, ping.PingValue), true, 50);
+        Log.d(this.getClass().getName(), "Initial Points:");
+        long day_ago = (System.currentTimeMillis() / 1000L)-3600*24;
+
+
+        for (PingData ping : data_connection.getPings(3600*24)) {
+            double time = (double)(ping.Timestamp - day_ago)/3600d;
+            mSeries.appendData(new DataPoint(time, ping.PingValue), true, 50);
+            Log.d(this.getClass().getName(), ping.toString());
         }
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent myIntent = new Intent(MainActivity.this, Alarm.class);
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
-        setAlarm();
     }
 
     private void setAlarm(){
-        Log.d(this.getClass().getName(), "Set Alarm");
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime()+AlarmManager.INTERVAL_FIFTEEN_MINUTES, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
     }
     private void cancelAlarm() {

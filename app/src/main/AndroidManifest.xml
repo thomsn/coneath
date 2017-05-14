@@ -19,6 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--DATABASE VIEWER<activity android:name="mthomson.coneath.AndroidDatabaseManager"-->
+            <!--android:theme="@style/Theme.AppCompat.Light"/>-->
         <service
         android:name=".background.Service"
         android:exported="false"/>

@@ -1,15 +1,19 @@
 package mthomson.coneath;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.db.chart.model.BarSet;
+import com.db.chart.model.LineSet;
+import com.db.chart.view.BarChartView;
+import com.db.chart.view.ChartView;
+import com.db.chart.view.LineChartView;
+
+import java.util.Arrays;
 
 import mthomson.coneath.background.Alarm;
 import mthomson.coneath.storage.PingData;
@@ -21,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     }
     AlarmManager alarmManager;
     private PendingIntent pendingIntent;
+
+    private BarChartView mChart;
+    private BarSet mLine;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,29 +39,24 @@ public class MainActivity extends AppCompatActivity {
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
         setAlarm();
 
-
 //        Intent dbmanager = new Intent(getActivity(), AndroidDatabaseManager.class);
 //        startActivity(dbmanager);
     }
 
     private void setupGraph(){
-        GraphView graph = (GraphView) findViewById(R.id.graph);
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(0.5);
-        mSeries.setDrawDataPoints(true);
-        mSeries.setDrawBackground(true);
-        graph.addSeries(mSeries);
-        Log.d(this.getClass().getName(), "Initial Points:");
-        long day_ago = (System.currentTimeMillis() / 1000L)-3600*24;
+        mChart = (BarChartView) findViewById(R.id.barchart);
+        mLine = new BarSet(new String[]{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}, new float[]{0,1,0,2,0,5,0});
+        int ONE_DAY = 86400;
+
+        mDataConnection.getPings(ONE_DAY);
 
 
-        for (PingData ping : data_connection.getPings(3600*24)) {
-            double time = (double)(ping.Timestamp - day_ago)/3600d;
-            mSeries.appendData(new DataPoint(time, ping.PingValue), true, 50);
-            Log.d(this.getClass().getName(), ping.toString());
-        }
+
+
+        mChart.addData(mLine);
+        mChart.show();
     }
+
 
     private void setAlarm(){
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime()+AlarmManager.INTERVAL_FIFTEEN_MINUTES, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
@@ -64,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private PingDataConnector data_connection = new PingDataConnector(this, null);
+    private PingDataConnector mDataConnection = new PingDataConnector(this);
 
-    private LineGraphSeries<DataPoint> mSeries = new LineGraphSeries<>();
 }

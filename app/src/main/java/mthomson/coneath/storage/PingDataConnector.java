@@ -18,10 +18,6 @@ import mthomson.coneath.AndroidDatabaseManager;
 public class PingDataConnector extends SQLiteOpenHelper{
     private static final int DATABASE_VERSION = 1;
 
-    public PingDataConnector(Context context, SQLiteDatabase.CursorFactory factory) {
-        super(context, "PingData", factory, DATABASE_VERSION);
-    }
-
     public PingDataConnector(Context context) {
         super(context, "PingData", null, DATABASE_VERSION);
     }
